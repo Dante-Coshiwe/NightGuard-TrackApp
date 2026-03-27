@@ -1,0 +1,301 @@
+﻿import { useState, useEffect } from "react";
+import { useAuth } from "../hooks/useAuth";
+import { api } from "../services/api";
+import SidebarLayout from "../components/SidebarLayout";
+import LoadingSpinner from "../components/LoadingSpinner";
+import { 
+  Users, 
+  Building2, 
+  Shield, 
+  AlertTriangle,
+  Car,
+  Footprints,
+  FileText,
+  Package,
+  AlertCircle,
+  TrendingUp,
+  TrendingDown,
+  Clock,
+  Smartphone
+} from "lucide-react";
+
+export default function GeneralAdminDashboard() {
+  const { user } = useAuth();
+  const [dashboardData, setDashboardData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    fetchDashboardData();
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      const response = await api.get("/admin/dashboard");
+      setDashboardData(response.data);
+    } catch (err) {
+      console.error("Failed to fetch dashboard:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <SidebarLayout>
+        <LoadingSpinner text="Loading dashboard data..." />
+      </SidebarLayout>
+    );
+  }
+
+  const stats = dashboardData?.summary || {};
+  const sites = dashboardData?.sites || [];
+  const sitesWithoutGuards = dashboardData?.sites_with_no_guards || [];
+
+  const StatCard = ({ title, value, icon: Icon, color = "white", trend }) => (
+    <div style={{
+      background: "#0a0a0a",
+      border: "1px solid #1f1f1f",
+      borderRadius: 12,
+      padding: "20px",
+      transition: "all 0.3s ease"
+    }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
+        <div style={{ color: "#666666", fontSize: 13, fontWeight: 500 }}>{title}</div>
+        <Icon size={20} color={color === "red" ? "#dc2626" : "#ffffff"} />
+      </div>
+      <div style={{ fontSize: 32, fontWeight: 700, color: color === "red" ? "#dc2626" : "#ffffff", marginBottom: 8 }}>
+        {value || 0}
+      </div>
+      {trend && (
+        <div style={{ fontSize: 12, color: trend > 0 ? "#10b981" : "#ef4444", display: "flex", alignItems: "center", gap: 4 }}>
+          {trend > 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+          {Math.abs(trend)}% from last period
+        </div>
+      )}
+    </div>
+  );
+
+  return (
+    <SidebarLayout>
+      <div style={{ 
+        background: "#000000", 
+        minHeight: "100vh",
+        padding: "24px 32px"
+      }}>
+        {/* Header */}
+        <div style={{ 
+          marginBottom: 32,
+          paddingBottom: 16,
+          borderBottom: "1px solid #1f1f1f"
+        }}>
+          <h1 style={{ 
+            margin: 0, 
+            fontSize: 28, 
+            fontWeight: 700,
+            color: "#ffffff"
+          }}>
+            Dashboard
+          </h1>
+          <p style={{ 
+            margin: "8px 0 0", 
+            fontSize: 14, 
+            color: "#666666",
+            display: "flex",
+            alignItems: "center",
+            gap: 8
+          }}>
+            <Clock size={14} />
+            Last refreshed: {currentTime.toLocaleTimeString()}
+          </p>
+        </div>
+
+        {/* Stats Grid - 4 columns for better spacing */}
+        <div style={{ 
+          display: "grid", 
+          gridTemplateColumns: "repeat(4, 1fr)", 
+          gap: 20, 
+          marginBottom: 32 
+        }}>
+          <StatCard title="Guards on Duty" value={stats.guards_on_duty} icon={Shield} color="white" />
+          <StatCard title="Sites With No Guards" value={stats.sites_with_no_guards} icon={Building2} color="red" />
+          <StatCard title="Patrols Acknowledged" value={stats.patrols_acknowledged} icon={FileText} color="white" />
+          <StatCard title="Patrols Not Acknowledged" value={stats.patrols_not_acknowledged} icon={AlertCircle} color="red" />
+          <StatCard title="Pedestrians Entered" value={stats.pedestrians_entered} icon={Footprints} color="white" />
+          <StatCard title="Pedestrians Exited" value={stats.pedestrians_exited} icon={Footprints} color="white" />
+          <StatCard title="Incidents Recorded" value={stats.incidents_recorded} icon={AlertTriangle} color="red" />
+          <StatCard title="Vehicles Entered" value={stats.vehicles_entered} icon={Car} color="white" />
+          <StatCard title="Vehicles Exited" value={stats.vehicles_exited} icon={Car} color="white" />
+          <StatCard title="OB Entries Recorded" value={stats.ob_entries_recorded} icon={FileText} color="white" />
+          <StatCard title="Wheel Clamps" value={stats.wheel_clamps} icon={Package} color="red" />
+          <StatCard title="Total Devices" value={stats.total_devices} icon={Smartphone} color="white" />
+        </div>
+
+        {/* Organizations Table */}
+        {dashboardData?.organizations?.length > 0 && (
+          <div style={{
+            background: "#0a0a0a",
+            border: "1px solid #1f1f1f",
+            borderRadius: 12,
+            marginBottom: 32,
+            overflow: "hidden"
+          }}>
+            <div style={{ padding: "20px 24px", borderBottom: "1px solid #1f1f1f" }}>
+              <h2 style={{ margin: 0, fontSize: 18, fontWeight: 600, display: "flex", alignItems: "center", gap: 8 }}>
+                <Building2 size={20} color="#dc2626" />
+                Organizations Overview
+              </h2>
+            </div>
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr style={{ borderBottom: "1px solid #1f1f1f", textAlign: "left" }}>
+                    <th style={{ padding: "16px 20px", color: "#999999", fontWeight: 500, fontSize: 13 }}>Organization</th>
+                    <th style={{ padding: "16px 20px", color: "#999999", fontWeight: 500, fontSize: 13 }}>Sites</th>
+                    <th style={{ padding: "16px 20px", color: "#999999", fontWeight: 500, fontSize: 13 }}>Devices</th>
+                    <th style={{ padding: "16px 20px", color: "#999999", fontWeight: 500, fontSize: 13 }}>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {dashboardData.organizations.map((org, idx) => (
+                    <tr key={idx} style={{ borderBottom: idx === dashboardData.organizations.length - 1 ? "none" : "1px solid #1f1f1f" }}>
+                      <td style={{ padding: "16px 20px", fontWeight: 500 }}>{org.org_name}</td>
+                      <td style={{ padding: "16px 20px" }}>{org.sites_count || 0}</td>
+                      <td style={{ padding: "16px 20px" }}>
+                        {org.devices_online || 0}/{org.devices_count || 0} online
+                      </td>
+                      <td style={{ padding: "16px 20px" }}>
+                        <span style={{
+                          background: (org.devices_online === org.devices_count) ? "#0f2a1f" : "#2a1f0f",
+                          color: (org.devices_online === org.devices_count) ? "#10b981" : "#f59e0b",
+                          padding: "4px 12px",
+                          borderRadius: 20,
+                          fontSize: 12,
+                          fontWeight: 500
+                        }}>
+                          {(org.devices_online === org.devices_count) ? "All Online" : "Partial Outage"}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Two Column Layout */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+          {/* Recent Sites */}
+          <div style={{
+            background: "#0a0a0a",
+            border: "1px solid #1f1f1f",
+            borderRadius: 12,
+            overflow: "hidden"
+          }}>
+            <div style={{ padding: "20px 24px", borderBottom: "1px solid #1f1f1f" }}>
+              <h2 style={{ margin: 0, fontSize: 18, fontWeight: 600, display: "flex", alignItems: "center", gap: 8 }}>
+                <Building2 size={20} color="#dc2626" />
+                Recent Sites
+              </h2>
+            </div>
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr style={{ borderBottom: "1px solid #1f1f1f", textAlign: "left" }}>
+                    <th style={{ padding: "12px 20px", color: "#999999", fontWeight: 500, fontSize: 12 }}>Site Name</th>
+                    <th style={{ padding: "12px 20px", color: "#999999", fontWeight: 500, fontSize: 12 }}>Devices</th>
+                    <th style={{ padding: "12px 20px", color: "#999999", fontWeight: 500, fontSize: 12 }}>Last Activity</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sites.slice(0, 5).map((site, idx) => (
+                    <tr key={idx} style={{ borderBottom: idx === 4 ? "none" : "1px solid #1f1f1f" }}>
+                      <td style={{ padding: "12px 20px", fontSize: 13 }}>{site.site_name}</td>
+                      <td style={{ padding: "12px 20px", fontSize: 13 }}>{site.devices?.length || 0}</td>
+                      <td style={{ padding: "12px 20px", fontSize: 12, color: "#666666" }}>
+                        {site.devices?.[0]?.latest_sync_update 
+                          ? new Date(site.devices[0].latest_sync_update).toLocaleString()
+                          : 'Never'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Sites With No Guards */}
+          <div style={{
+            background: "#0a0a0a",
+            border: "1px solid #1f1f1f",
+            borderRadius: 12,
+            overflow: "hidden"
+          }}>
+            <div style={{ padding: "20px 24px", borderBottom: "1px solid #1f1f1f" }}>
+              <h2 style={{ margin: 0, fontSize: 18, fontWeight: 600, display: "flex", alignItems: "center", gap: 8 }}>
+                <AlertTriangle size={20} color="#dc2626" />
+                Sites With No Guards
+              </h2>
+              <p style={{ margin: "8px 0 0", fontSize: 12, color: "#dc2626" }}>
+                Total: {stats.sites_with_no_guards || 0}
+              </p>
+            </div>
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr style={{ borderBottom: "1px solid #1f1f1f", textAlign: "left" }}>
+                    <th style={{ padding: "12px 20px", color: "#999999", fontWeight: 500, fontSize: 12 }}>Site Name</th>
+                    <th style={{ padding: "12px 20px", color: "#999999", fontWeight: 500, fontSize: 12 }}>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sitesWithoutGuards.length > 0 ? (
+                    sitesWithoutGuards.slice(0, 5).map((site, idx) => (
+                      <tr key={idx} style={{ borderBottom: idx === 4 ? "none" : "1px solid #1f1f1f" }}>
+                        <td style={{ padding: "12px 20px", fontSize: 13 }}>{site.site_name}</td>
+                        <td style={{ padding: "12px 20px" }}>
+                          <span style={{
+                            background: "#2a1f0f",
+                            color: "#f59e0b",
+                            padding: "2px 8px",
+                            borderRadius: 12,
+                            fontSize: 11,
+                            fontWeight: 500
+                          }}>
+                            No Guard Assigned
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="2" style={{ padding: "40px", textAlign: "center", color: "#666666" }}>
+                        All sites have guards assigned
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div style={{
+          textAlign: "center",
+          padding: "24px",
+          borderTop: "1px solid #1f1f1f",
+          marginTop: 32,
+          color: "#666666",
+          fontSize: 12
+        }}>
+          <div>Last Refreshed: {new Date().toLocaleString()}</div>
+          <div style={{ marginTop: 8 }}>© 2024 NightGuard Track - Security Management System</div>
+        </div>
+      </div>
+    </SidebarLayout>
+  );
+}
