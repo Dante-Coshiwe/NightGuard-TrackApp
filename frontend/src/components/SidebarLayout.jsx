@@ -1,7 +1,10 @@
 ﻿import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-import { Menu, X, LogOut, User } from "lucide-react";
+import { 
+  Menu, X, LogOut, User,
+  LayoutDashboard, Shield, Car, Footprints, AlertTriangle, FileText, Package, CircleAlert, BookOpen, Users, Building2, Smartphone, Settings
+} from "lucide-react";
 
 export default function SidebarLayout({ children }) {
   const { user, logout } = useAuth();
@@ -10,19 +13,19 @@ export default function SidebarLayout({ children }) {
   const location = useLocation();
 
   const menuItems = [
-    { label: "Dashboard", path: "/admin" },
-    { label: "Patrols", path: "/admin/patrols" },
-    { label: "Vehicles", path: "/admin/vehicles" },
-    { label: "Pedestrians", path: "/admin/pedestrians" },
-    { label: "Incidents", path: "/admin/incidents" },
-    { label: "Dockets", path: "/admin/dockets" },
-    { label: "Deliveries", path: "/admin/deliveries" },
-    { label: "Wheel Clamps", path: "/admin/wheelclamps" },
-    { label: "OB Entries", path: "/admin/obentries" },
-    { label: "Guards", path: "/admin/guards" },
-    { label: "Sites", path: "/admin/sites" },
-    { label: "Devices", path: "/admin/devices" },
-    { label: "Settings", path: "/admin/settings" }
+    { label: "Dashboard", path: "/admin", icon: LayoutDashboard },
+    { label: "Patrols", path: "/admin/patrols", icon: Shield },
+    { label: "Vehicles", path: "/admin/vehicles", icon: Car },
+    { label: "Pedestrians", path: "/admin/pedestrians", icon: Footprints },
+    { label: "Incidents", path: "/admin/incidents", icon: AlertTriangle },
+    { label: "Dockets", path: "/admin/dockets", icon: FileText },
+    { label: "Deliveries", path: "/admin/deliveries", icon: Package },
+    { label: "Wheel Clamps", path: "/admin/wheelclamps", icon: CircleAlert },
+    { label: "OB Entries", path: "/admin/obentries", icon: BookOpen },
+    { label: "Guards", path: "/admin/guards", icon: Users },
+    { label: "Sites", path: "/admin/sites", icon: Building2 },
+    { label: "Devices", path: "/admin/devices", icon: Smartphone },
+    { label: "Settings", path: "/admin/settings", icon: Settings }
   ];
 
   return (
@@ -46,6 +49,7 @@ export default function SidebarLayout({ children }) {
         <nav style={{ padding: "20px 12px" }}>
           {menuItems.map((item) => {
             const isActive = location.pathname === item.path;
+            const Icon = item.icon;
             return (
               <button
                 key={item.path}
@@ -57,15 +61,16 @@ export default function SidebarLayout({ children }) {
                   background: isActive ? "#1a1a1a" : "transparent",
                   border: "none",
                   borderRadius: 8,
-                  textAlign: "left",
-                  color: "#fff",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12,
                   cursor: "pointer",
-                  fontSize: 14,
-                  fontWeight: isActive ? 600 : 400,
-                  transition: "background 0.2s"
+                  transition: "background 0.2s",
+                  color: isActive ? "#fff" : "#999"
                 }}
               >
-                {sidebarOpen ? item.label : "•"}
+                <Icon size={20} color={isActive ? "#dc2626" : "#666"} />
+                {sidebarOpen && <span style={{ fontSize: 14, fontWeight: isActive ? 600 : 400 }}>{item.label}</span>}
               </button>
             );
           })}
@@ -129,7 +134,9 @@ export default function SidebarLayout({ children }) {
                 border: "none",
                 borderRadius: 6,
                 color: "#fff",
-                cursor: "pointer"
+                cursor: "pointer",
+                display: "flex",
+                justifyContent: "center"
               }}
             >
               <LogOut size={14} />
