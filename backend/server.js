@@ -18,6 +18,7 @@ import guardsRoutes from "./routes/guardsRoutes.js";
 import sitesRoutes from "./routes/sitesRoutes.js";
 import devicesRoutes from "./routes/devicesRoutes.js";
 import docketsRoutes from "./routes/docketsRoutes.js";
+import shiftsRoutes from "./routes/shiftsRoutes.js";
 
 dotenv.config();
 
@@ -51,6 +52,8 @@ app.use("/api", guardsRoutes);
 app.use("/api", sitesRoutes);
 app.use("/api", devicesRoutes);
 app.use("/api", docketsRoutes);
+app.use("/api", shiftsRoutes);
+
 
 // Health check
 app.get("/api/health", (req, res) => {

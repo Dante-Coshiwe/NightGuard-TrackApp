@@ -1,4 +1,5 @@
 ﻿import express from "express";
+import { guardController } from "../controllers/guardController.js";
 import { guardsController } from "../controllers/guardsController.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 import { roleMiddleware } from "../middleware/roleMiddleware.js";
