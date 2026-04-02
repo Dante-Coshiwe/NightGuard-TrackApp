@@ -32,4 +32,6 @@ api.interceptors.response.use(
   }
 );
 
+export const addGuard = (data) => api.post('/shifts/guards/add', data).then(res => res.data);
+
 export { api };

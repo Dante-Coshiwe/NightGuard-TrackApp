@@ -32,5 +32,6 @@ router.post(
   roleMiddleware(["guard", "marshal", "admin"]),
   shiftsController.endShift
 );
+router.post("/shifts/guards/add", authMiddleware, roleMiddleware(["admin"]), shiftsController.addGuard);
 
 export default router;

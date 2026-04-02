@@ -102,4 +102,40 @@ export const shiftsController = {
       res.status(500).json({ error: error.message });
     }
   },
+  async addGuard(req, res) {
+  try {
+    const siteId = req.user.site_id;
+    const organizationId = req.user.organization_id;
+    const { full_name, phone } = req.body;
+
+    if (!full_name) return res.status(400).json({ error: "Full name is required" });
+
+    // Create auth user with a default password they can change later
+    const email = `guard_${Date.now()}@nightguard.local`;
+    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+      email,
+      password: "NightGuard@2024",
+      email_confirm: true,
+    });
+
+    if (authError) throw authError;
+
+    // Create profile
+    const { data, error } = await supabase.from("profiles").upsert({
+      id: authData.user.id,
+      full_name,
+      phone: phone || null,
+      user_type: "guard",
+      site_id: siteId,
+      organization_id: organizationId,
+      is_active: true,
+    }).select().single();
+
+    if (error) throw error;
+    res.status(201).json(data);
+  } catch (error) {
+    console.error("Error adding guard:", error);
+    res.status(500).json({ error: error.message });
+  }
+},
 };

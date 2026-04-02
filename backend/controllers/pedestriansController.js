@@ -2,15 +2,10 @@
 
 export const pedestriansController = {
   async getRecentPedestrians(req, res) {
-    try {
-      const { data: pedestrians, error } = await supabase
-        .from("pedestrians")
-        .select(`
-          *,
-          sites (site_name)
-        `)
-        .order("entered_at", { ascending: false })
-        .limit(50);
+  try {
+    const siteId = req.user.site_id;
+    console.log('Fetching pedestrians for site_id:', siteId);
+    console.log('User:', req.user.id, req.user.email);
 
       if (error) throw error;
 
