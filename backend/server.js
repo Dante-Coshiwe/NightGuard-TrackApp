@@ -1,4 +1,4 @@
-﻿import express from "express";
+import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import cors from "cors";
@@ -54,7 +54,6 @@ app.use("/api", devicesRoutes);
 app.use("/api", docketsRoutes);
 app.use("/api", shiftsRoutes);
 
-
 // Health check
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
@@ -78,7 +77,8 @@ io.on("connection", (socket) => {
 
 const PORT = process.env.PORT || 4000;
 httpServer.listen(PORT, () => {
-  console.log(`✅ Server running on http://localhost:${PORT}`);
+  console.log(`? Server running on http://localhost:${PORT}`);
 });
 
 export { io };
+

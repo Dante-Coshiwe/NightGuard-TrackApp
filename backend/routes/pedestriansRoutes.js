@@ -1,15 +1,11 @@
-﻿import express from "express";
+import express from "express";
 import { pedestriansController } from "../controllers/pedestriansController.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 import { roleMiddleware } from "../middleware/roleMiddleware.js";
-
 const router = express.Router();
-
-router.get(
-  "/pedestrians/recent",
-  authMiddleware,
-  roleMiddleware(["admin"]),
-  pedestriansController.getRecentPedestrians
-);
-
+router.get("/pedestrians/recent", authMiddleware, roleMiddleware(["guard", "marshal", "admin"]), pedestriansController.getRecentPedestrians);
+router.post("/pedestrians/entry", authMiddleware, roleMiddleware(["guard", "marshal", "admin"]), pedestriansController.createEntry);
+router.get("/pedestrians/report", authMiddleware, roleMiddleware(["admin"]), pedestriansController.getReport);
+router.patch("/pedestrians/:id/exit", authMiddleware, roleMiddleware(["guard", "marshal", "admin"]), pedestriansController.markExit);
+router.patch("/pedestrians/:id/exit", authMiddleware, roleMiddleware(["guard", "marshal", "admin"]), pedestriansController.markExit);
 export default router;

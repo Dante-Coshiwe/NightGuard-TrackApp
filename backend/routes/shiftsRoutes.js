@@ -5,33 +5,11 @@ import { roleMiddleware } from "../middleware/roleMiddleware.js";
 
 const router = express.Router();
 
-router.get(
-  "/shifts/active",
-  authMiddleware,
-  roleMiddleware(["guard", "marshal", "admin"]),
-  shiftsController.getActiveShift
-);
-
-router.get(
-  "/shifts/guards",
-  authMiddleware,
-  roleMiddleware(["guard", "marshal", "admin"]),
-  shiftsController.getGuardsList
-);
-
-router.post(
-  "/shifts/start",
-  authMiddleware,
-  roleMiddleware(["guard", "marshal", "admin"]),
-  shiftsController.startShift
-);
-
-router.post(
-  "/shifts/end",
-  authMiddleware,
-  roleMiddleware(["guard", "marshal", "admin"]),
-  shiftsController.endShift
-);
+router.get("/shifts/active", authMiddleware, roleMiddleware(["guard", "marshal", "admin"]), shiftsController.getActiveShift);
+router.get("/shifts/guards", authMiddleware, roleMiddleware(["guard", "marshal", "admin"]), shiftsController.getGuardsList);
+router.post("/shifts/start", authMiddleware, roleMiddleware(["guard", "marshal", "admin"]), shiftsController.startShift);
+router.post("/shifts/end", authMiddleware, roleMiddleware(["guard", "marshal", "admin"]), shiftsController.endShift);
 router.post("/shifts/guards/add", authMiddleware, roleMiddleware(["admin"]), shiftsController.addGuard);
 
+router.get("/shifts/completed", authMiddleware, roleMiddleware(["admin"]), shiftsController.getCompletedShifts);
 export default router;
