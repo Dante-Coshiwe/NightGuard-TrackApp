@@ -1,4 +1,4 @@
-import { supabase } from "../config/database.js";
+﻿import { supabase } from "../config/database.js";
 export const pedestriansController = {
   async getRecentPedestrians(req, res) {
     try {
@@ -43,4 +43,23 @@ export const pedestriansController = {
       res.status(500).json({ error: error.message });
     }
   }
+  ,
+async markExit(req, res) {
+  try {
+    const { id } = req.params;
+    const siteId = req.user.site_id;
+    const { data, error } = await supabase
+      .from("pedestrians")
+      .update({ exit_time: new Date(), exited_at: new Date() })
+      .eq("id", id)
+      .eq("site_id", siteId)
+      .select()
+      .single();
+    if (error) throw error;
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
 };

@@ -104,3 +104,5 @@ export const getMyVehicleReport = () => api.get('/vehicles/my-report').then(res 
 
 // Admin: Get all guards with their stats
 export const getGuardsWithStats = () => api.get('/guards/stats').then(res => res.data);
+export const markPedestrianExit = (id) => api.patch(/pedestrians//exit).then(res => res.data);
+export const markVehicleExit = (id) => api.patch(/vehicles//exit).then(res => res.data);
