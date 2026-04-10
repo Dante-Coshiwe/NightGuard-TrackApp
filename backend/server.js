@@ -19,8 +19,7 @@ import sitesRoutes from "./routes/sitesRoutes.js";
 import devicesRoutes from "./routes/devicesRoutes.js";
 import docketsRoutes from "./routes/docketsRoutes.js";
 import shiftsRoutes from "./routes/shiftsRoutes.js";
-
-dotenv.config();
+import usersRoutes from "./routes/usersRoutes.js";  
 
 const app = express();
 const httpServer = createServer(app);
@@ -29,7 +28,7 @@ const httpServer = createServer(app);
 app.use(cors({
   origin: ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175"],
   credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
@@ -53,7 +52,9 @@ app.use("/api", sitesRoutes);
 app.use("/api", devicesRoutes);
 app.use("/api", docketsRoutes);
 app.use("/api", shiftsRoutes);
+app.use("/api", usersRoutes);
 
+dotenv.config();
 // Health check
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });

@@ -101,7 +101,7 @@ export const shiftsController = {
       const email = "guard_" + timestamp + "@nightguard.local";
       const { data: authData, error: authError } = await supabase.auth.admin.createUser({
         email,
-        password: "NightGuard@2024",
+        password: "1234",
         email_confirm: true,
       });
       if (authError) throw authError;
@@ -109,6 +109,7 @@ export const shiftsController = {
         .from("profiles")
         .upsert({
           id: authData.user.id,
+          email,  // add this line
           full_name,
           phone: phone || null,
           user_type: "guard",

@@ -1,4 +1,5 @@
 ﻿import axios from 'axios';
+import { supabase } from './lib/supabase';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
@@ -7,18 +8,36 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      //localStorage.removeItem('token');
-      //window.location.href = '/login';
+  async (error) => {
+    if (error.response?.status === 401 && !error.config._retry) {
+      error.config._retry = true;
+      try {
+        const refreshToken = localStorage.getItem('refresh_token');
+        if (refreshToken) {
+          const { data } = await supabase.auth.refreshSession({ refresh_token: refreshToken });
+          if (data?.session) {
+            localStorage.setItem('token', data.session.access_token);
+            localStorage.setItem('refresh_token', data.session.refresh_token);
+            error.config.headers.Authorization = `Bearer ${data.session.access_token}`;
+            return api(error.config);
+          }
+        }
+      } catch (refreshErr) {
+        console.error('Refresh failed:', refreshErr);
+      }
     }
     return Promise.reject(error);
   }
@@ -104,5 +123,23 @@ export const getMyVehicleReport = () => api.get('/vehicles/my-report').then(res 
 
 // Admin: Get all guards with their stats
 export const getGuardsWithStats = () => api.get('/guards/stats').then(res => res.data);
-export const markPedestrianExit = (id) => api.patch(/pedestrians//exit).then(res => res.data);
-export const markVehicleExit = (id) => api.patch(/vehicles//exit).then(res => res.data);
+export const markPedestrianExit = (id) => api.patch(`/pedestrians/${id}/exit`).then(res => res.data);
+export const markVehicleExit = (id) => api.patch(`/vehicles/${id}/exit`).then(res => res.data);
+
+// Get guards list for login screen (no auth needed)
+export const getGuardsBySite = (siteId) => api.get(`/auth/guards/${siteId}`).then(res => res.data);
+export const guardLogin = (data) => api.post('/auth/guard-login', data);
+export const guardLogout = () => api.post('/auth/guard-logout');
+
+export const getGuards = () => api.get('/users/guards').then(res => res.data);
+export const addGuardUser = (data) => api.post('/users/guards', data).then(res => res.data);
+export const updateGuardPin = (id, pin) => api.patch(`/users/guards/${id}/pin`, { pin }).then(res => res.data);
+export const toggleGuardActive = (id, is_active) => api.patch(`/users/guards/${id}/toggle`, { is_active }).then(res => res.data);
+
+export const getMySite = () => api.get('/sites/mine').then(res => res.data);
+export const updateMySite = (data) => api.put('/sites/mine', data).then(res => res.data);
+
+export const logNFCScan = (data) => api.post('/nfc/scan', data).then(res => res.data);
+export const registerNFCTag = (data) => api.post('/nfc/register', data).then(res => res.data);
+export const getNFCCheckpoints = () => api.get('/nfc/checkpoints').then(res => res.data);
+export const getNFCScans = () => api.get('/nfc/scans').then(res => res.data);
